@@ -1,0 +1,83 @@
+<html>
+    <head>
+    <!-- Importar Biblioteca -->
+        <script src="Build/Cesium/Cesium.js"></script>
+        <style>
+            @import url("Build/Cesium/Widgets/widgets.css");
+        </style>
+    </head>
+    <body>
+
+    <!-- Contenedor del visor Cesium -->
+    <div id="cesiumContainer"></div>
+
+        <script>
+
+		//Crear un objeto visor y asignarlo al contenedor con algunas propiedades	
+        //Crea una variable llamada terrain, llama la funcion createDefaultTerrainProviderViewModels de la biblioteca cesium
+        var terrain = Cesium.createDefaultTerrainProviderViewModels();
+        
+        var viewer = new Cesium.Viewer('cesiumContainer', {
+            
+            selectionIndicator : true,
+            infoBox: true,
+            terrainProviderViewModels: terrain,
+            selectedTerrainProviderViewModel: terrain[1]
+        });
+        
+		//Definicion de variables
+		var entity = viewer.entities.add({
+			//Cartesian3 representa un punto en el espacio euclidiano
+			//Cesium.Cartesian3.fromDegrees(longitude, latitude, height, ellipsoid, result)
+			position : Cesium.Cartesian3.fromDegrees(-74.12553369998932, 4.712853897354378, 0),
+   			model : {
+   				uri : '',
+   				scale:1
+   				// minimumPixelSize : 128
+   			}, 
+		});
+        
+       
+        var terrainSamplePositions = [];
+        
+        var dataSource2 = new Cesium.GeoJsonDataSource();
+        
+        var promise = dataSource2.load('quiz_10poligonos.geojson');
+        
+        promise.then(function(dataSource2) {
+            viewer.dataSources.add(dataSource2);
+            viewer.zoomTo(dataSource2);
+            
+            var entities2 = dataSource2.entities.values;
+    
+            var colorHash = {};
+            for (var i = 0; i < entities2.length; i++) {
+                var entity = entities2[i];
+                var name = entity.Elev_in_m;
+                var color = colorHash[name];
+                if (!color) {
+                    color = Cesium.Color.RED; 
+                    colorHash[name] = color;
+                }
+                entity.polygon.material = color;
+                entity.polygon.outline = false;
+                var position = entity.polygon.hierarchy.getValue().positions[0];
+                terrainSamplePositions.push(Cesium.Cartographic.fromCartesian(position));
+                entity.polygon.extrudedHeight = entity.properties.altura;
+                entity.polygon.height = 0;
+            }
+            Cesium.when(Cesium.sampleTerrain(viewer.terrainProvider, 11, terrainSamplePositions), function() {
+            	for (var i = 0; i < entities2.length; i++) {
+	                var entity = entities2[i];
+                	var terrainHeight = terrainSamplePositions[i].height;
+                	entity.polygon.height = terrainHeight;
+                	entity.polygon.extrudedHeight = entity.properties.altura + terrainHeight;
+            	}
+        	});
+    	}).otherwise(function(error){
+        	console.error(error);
+        	console.error('No se cumplió la promesa!!');
+		});
+		</script>
+    </body>
+</html>
