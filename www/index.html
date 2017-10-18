@@ -12,31 +12,79 @@
     <div id="cesiumContainer"></div>
 
         <script>
+        var czml = [{
+            "id" : "document",
+            "name" : "CZML Path",
+            "version" : "1.0",
+            "clock": {
+                "interval": "2017-08-04T10:00:00Z/2017-08-04T15:00:00Z",
+                "currentTime": "2017-08-04T10:00:00Z",
+                "multiplier": 5
+            }
+        }, {
+            "id" : "path",
+            "name" : "Ruta animada en CESIUM!!!",
+            "description" : "Vuelo en parapente - SIG 3D",
+            "availability" : "2017-08-04T10:00:00Z/2017-08-04T15:00:00Z",
+            "path" : {
+                "material" : {
+                    "polylineOutline" : {
+                        "color" : {
+                            "rgba" : [255, 0, 255, 255]
+                        },
+                        "outlineColor" : {
+                            "rgba" : [0, 255, 255, 255]
+                        },
+                        "outlineWidth" : 5
+                    }
+                },
+                "width" : 0,
+                "leadTime" : 10,
+                "trailTime" : 1000,
+                "resolution" : 5
+            },
+            "billboard" : {
+                "image" : "caminando.jpg",
+                "scale" : 1,
+                "eyeOffset": {
+                    "cartesian": [ 0.0, 0.0, -10.0 ]
+                }
+            },
+            "position" : {
+                "epoch" : "2017-08-04T10:00:00Z",
+                "cartographicDegrees" : [
+                0,-74.12899667799996,4.7141563920000635,3000,
+                50,-74.12676125999997,4.7136601320000295,3000,
+                100,-74.12330033399996,4.716391487000067,3000,
+                150,-74.12720079999997,4.711924178000061,3000,
+                200,-74.12629846599998,4.714719139000067,3000,
+                250,-74.1253513097763,4.714586090181794,3000,
+                300,-74.12708133459091,4.7138830556505695,3000,
+                350,-74.12666827440262,4.7137547450890125,3000,
+                400,-74.12871211767197,4.715850481293597,3000,
+                450,-74.12659049034119,4.715412088018658,3000,
+                ]
+            }
+        }];
 
 		//Crear un objeto visor y asignarlo al contenedor con algunas propiedades	
         //Crea una variable llamada terrain, llama la funcion createDefaultTerrainProviderViewModels de la biblioteca cesium
-        var terrain = Cesium.createDefaultTerrainProviderViewModels();
-        
+        var terrainProvider = new Cesium.CesiumTerrainProvider({
+            url : 'https://assets.agi.com/stk-terrain/v1/tilesets/world/tiles',
+            requestVertexNormals : true
+        });
+
         var viewer = new Cesium.Viewer('cesiumContainer', {
             
             selectionIndicator : true,
             infoBox: true,
-            terrainProviderViewModels: terrain,
-            selectedTerrainProviderViewModel: terrain[1]
+            terrainProvider : terrainProvider,
+            baseLayerPicker : false
         });
-        
-		//Definicion de variables
-		var entity = viewer.entities.add({
-			//Cartesian3 representa un punto en el espacio euclidiano
-			//Cesium.Cartesian3.fromDegrees(longitude, latitude, height, ellipsoid, result)
-			position : Cesium.Cartesian3.fromDegrees(-74.12553369998932, 4.712853897354378, 0),
-   			model : {
-   				uri : '',
-   				scale:1
-   				// minimumPixelSize : 128
-   			}, 
-		});
-        
+
+        viewer.dataSources.add(Cesium.CzmlDataSource.load(czml)).then(function(ds) {
+            viewer.trackedEntity = ds.entities.getById('path');
+        });
        
         var terrainSamplePositions = [];
         
@@ -53,7 +101,7 @@
             var colorHash = {};
             for (var i = 0; i < entities2.length; i++) {
                 var entity = entities2[i];
-                var name = entity.Elev_in_m;
+                var name = entity.properties.altura;
                 var color = colorHash[name];
                 if (!color) {
                     color = Cesium.Color.RED; 
