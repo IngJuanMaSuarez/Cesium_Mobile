@@ -1,0 +1,175 @@
+<html>
+    <head>
+    <!-- Importar Biblioteca -->
+        <script src="Build/Cesium/Cesium.js"></script>
+        <style>
+            @import url("Build/Cesium/Widgets/widgets.css");
+        </style>
+    </head>
+    <body>
+
+    <!-- Contenedor del visor Cesium -->
+    <div id="cesiumContainer"></div>
+
+        <script>
+
+        //Crear un objeto visor y asignarlo al contenedor con algunas propiedades   
+        //Crea una variable llamada terrain, llama la funcion createDefaultTerrainProviderViewModels de la biblioteca cesium
+        var terrain = Cesium.createDefaultTerrainProviderViewModels();
+
+    	var viewer = new Cesium.Viewer('cesiumContainer', {
+
+   	        selectionIndicator : true,
+            infoBox: true,
+            terrainProviderViewModels: terrain,
+            //selectedTerrainProviderViewModel: terrain[1]
+        });
+
+        //Definicion de variables, cada una esta llamanda un modelo 3D diferente con coordenadas	
+        var entity_uno = viewer.entities.add({
+	       //Cartesian3 representa un punto en el espacio euclidiano
+	       //Cesium.Cartesian3.fromDegrees(longitude, latitude, height, ellipsoid, result)
+            position : Cesium.Cartesian3.fromDegrees(-74.12553369998932, 4.712853897354378, 5),
+            model : {
+   	            uri : 'modelo_esfera.gltf',
+                //scale:1
+                minimumPixelSize : 128
+            },
+            label : {
+                show : false,
+                showBackground : true,
+                font : '14px monospace',
+                //horizontalOrigin : Cesium.HorizontalOrigin.LEFT,
+                //verticalOrigin : Cesium.VerticalOrigin.BASELINE,
+            }
+        });
+
+        var entity_dos = viewer.entities.add({
+	       //Cartesian3 representa un punto en el espacio euclidiano
+	       //Cesium.Cartesian3.fromDegrees(longitude, latitude, height, ellipsoid, result)
+	       position : Cesium.Cartesian3.fromDegrees(-74.12899667799996, 4.7141563920000635, 5),
+           model : {
+   	            uri : 'modelo_cubo.gltf',
+                //scale:1
+                minimumPixelSize : 128
+            },
+            label : {
+                show : false,
+                showBackground : true,
+                font : '14px monospace',
+                //horizontalOrigin : Cesium.HorizontalOrigin.LEFT,
+                //verticalOrigin : Cesium.VerticalOrigin.BASELINE,
+            }
+        });
+
+        var entity_tres = viewer.entities.add({
+	       //Cartesian3 representa un punto en el espacio euclidiano
+	       //Cesium.Cartesian3.fromDegrees(longitude, latitude, height, ellipsoid, result)
+	       position : Cesium.Cartesian3.fromDegrees(-74.12330033399996, 4.716391487000067, 5),
+           model : {
+   	            uri : 'modelo_cono.gltf',
+                //scale:1
+                minimumPixelSize : 128
+            },
+            label : {
+                show : false,
+                showBackground : true,
+                font : '14px monospace',
+                //horizontalOrigin : Cesium.HorizontalOrigin.LEFT,
+                //verticalOrigin : Cesium.VerticalOrigin.BASELINE,
+            }
+        });
+
+        //Zoom a la entidad_uno
+        viewer.zoomTo(entity_uno, new Cesium.HeadingPitchRange(Math.PI / 4, -Math.PI / 4, 3));
+
+        var scene = viewer.scene;
+
+
+        //Change color on mouse over.  This relies on the fact that given a primitive,
+        //you can retrieve an associted en
+        var lastColor;
+        var lastPick;
+        var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+
+
+
+        //Desplegar informacion al hacer click sobre alguna de las entidades
+        handler.setInputAction(function(click) {
+            var alertText = '';
+            function addToMessage(key, value) {
+                alertText += key + ': ' + value + '\n';
+            }
+
+            //Se crea una variable para cada entidad
+
+            var pickedObject_uno = scene.pick(click.position);
+            if (Cesium.defined(pickedObject_uno) && (pickedObject_uno.id === entity_uno)) {
+                addToMessage('Objeto', pickedObject_uno.id.id);
+                var position = viewer.camera.pickEllipsoid(click.position);
+                addToMessage('Posición X', click.position.x);
+                addToMessage('Posición Y', click.position.y);
+                var cartographicPosition = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+                addToMessage('Longitud', Cesium.Math.toDegrees(cartographicPosition.longitude));
+                addToMessage('Latitud', Cesium.Math.toDegrees(cartographicPosition.latitude));
+                terrainSamplePositions = [cartographicPosition];
+        
+                entity_uno.label.eyeOffset= new Cesium.Cartesian3(0,20,0);
+                entity_uno.label.show = true;
+                entity_uno.label.text = alertText;
+            }else{
+                entity_uno.label.show = false;
+            }
+
+            var pickedObject_dos = scene.pick(click.position);
+            if (Cesium.defined(pickedObject_dos) && (pickedObject_dos.id === entity_dos)) {
+                addToMessage('Objeto', pickedObject_dos.id.id);
+                var position = viewer.camera.pickEllipsoid(click.position);
+                addToMessage('Posición X', click.position.x);
+                addToMessage('Posición Y', click.position.y);
+                var cartographicPosition = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+                addToMessage('Longitud', Cesium.Math.toDegrees(cartographicPosition.longitude));
+                addToMessage('Latitud', Cesium.Math.toDegrees(cartographicPosition.latitude));
+                terrainSamplePositions = [cartographicPosition];
+        
+                entity_dos.label.eyeOffset= new Cesium.Cartesian3(0,20,0);
+                entity_dos.label.show = true;
+                entity_dos.label.text = alertText;
+            }else{
+                entity_dos.label.show = false;
+            }
+
+            var pickedObject_tres = scene.pick(click.position);
+            if (Cesium.defined(pickedObject_tres) && (pickedObject_tres.id === entity_tres)) {
+                addToMessage('Objeto', pickedObject_tres.id.id);
+                var position = viewer.camera.pickEllipsoid(click.position);
+                addToMessage('Posición X', click.position.x);
+                addToMessage('Posición Y', click.position.y);
+                var cartographicPosition = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+                addToMessage('Longitud', Cesium.Math.toDegrees(cartographicPosition.longitude));
+                addToMessage('Latitud', Cesium.Math.toDegrees(cartographicPosition.latitude));
+                terrainSamplePositions = [cartographicPosition];
+        
+                entity_tres.label.eyeOffset= new Cesium.Cartesian3(0,20,0);
+                entity_tres.label.show = true;
+                    entity_tres.label.text = alertText;
+            }else{
+                entity_tres.label.show = false;
+            }
+
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+
+        //Ability to look up the Model associated with an entity
+        function getModelForEntity(entity_uno) {
+            var primitives = viewer.scene.primitives;
+            for (var i = 0; i < primitives.length; i++) {
+                var primitive = primitives.get(i);
+                if (primitive instanceof Cesium.Model && primitive.id === entity_uno) {
+                    return primitive;
+                }
+            }
+        };
+        </script>
+    </body>
+</html>
